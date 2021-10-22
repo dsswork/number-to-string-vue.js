@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <main class="numbers-form" style="justify-content: center; display: flex;">
+        <div class="form-floating" style="text-align: center; width: 400px; margin-top: 250px">
+            <div class="form-group" style="vertical-align: center; height: 500px">
+                <div style="text-align: center">
+                    <h5 for="email" class="form-label">Enter the number</h5><br>
+                </div>
+                <div class="">
+                    <input id="number" class="form-control" name="number" style="border-radius: 4px"
+                    v-model="number" @keyup="convert()">
+                </div>
+                <div class="form-group" style="margin-top: 20px">
+                    <select class="form-select" v-model="locale" @change="convert()">
+                        <template v-for="language, loc in langArray">
+                            <option id="ru" :value="loc">{{language.lang}}</option>
+                        </template>
+                    </select>
+                </div>
+                <div class="">
+                    <textarea id="result" class="form-control"
+                              name="email" :value="string"
+                              style="border: none; margin-top: 20px; height: 300px; resize: none; background-color: white" readonly></textarea>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="lang/lang.js"></script>
+
+    <script>
+    Vue.createApp({
+	    data() { 
+		    return {
+                number: '',
+                string: '',
+                locale: 'en',
+                langArray: lang,
+            }
+        },
+        methods: {
+            convert() {
+                this.string = this.result(this.number);               
+            },
+            result(variable) {
+                switch(true) {
+                    case(variable<20): return lang[this.locale][variable];
+                    case(variable<100): return this.lessHundred(variable);
+                    case(variable<1000): return this.lessThousand(variable);           
+                    case(variable<1000000): return this.bigNumber(variable, 1000);
+                    case(variable<1000000000): return this.bigNumber(variable, 1000000);
+                    case(variable<1000000000000): return this.bigNumber(variable, 1000000000);
+                    case(variable<1000000000000000): return this.bigNumber(variable, 1000000000000);
+                }        
+            },
+            lessHundred(variable) {
+                let digit = this.result(variable%10);
+                let tens = lang[this.locale][Math.floor(variable/10) + '0']
+                if(variable%10==0) return tens;
+                return tens + ' ' + digit;
+            },
+            lessThousand(variable) {
+                let tens = variable%100;
+                return lang[this.locale][Math.floor(variable/100) + '00'] + ' ' + this.result(tens);
+            },
+            bigNumber(variable, pastNumber) {
+                let highDigits = Math.floor(variable/pastNumber);
+                let leastDigits = variable%pastNumber;
+
+                let digit = this.findDigit(highDigits);
+                let word = this.findWord(pastNumber, digit);
+
+                return this.result(highDigits) + ' ' + word + ' ' + this.result(leastDigits);
+            },
+            findWord(number, digit) {
+                let array = lang[this.locale][number];   
+                let res;       
+                for(var prop in array) {
+                    let reg = new RegExp(prop);
+                    if(reg.test(digit)){
+                        res = array[prop];
+                    }
+                }
+                return res;
+            },
+            findDigit(thousands) {
+                let tens = thousands%100;
+                if(tens<20) {
+                    return tens;
+                } else {
+                    return tens%10;
+                }
+            },
+            changeLanguage(loc) {
+                alert(loc)
+            }
+        },
+        computed: {
+
+        },
+        watch: {
+
+        }
+    }).mount('.numbers-form') 
+
+    </script>  
+
+</body>
+</html>
